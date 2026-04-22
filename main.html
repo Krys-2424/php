@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP Master — BTS SIO</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --danger: #ef4444;
+    --code-bg: #0d1117;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── GRID NOISE BACKGROUND ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; line-height: 1.2; }
+  .logo-sub { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+
+  .nav-section { margin-bottom: 8px; }
+
+  .nav-section-title {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--text);
+    background: rgba(0,212,255,0.05);
+    border-left-color: var(--accent);
+  }
+
+  .nav-item .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 20px;
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-item.active .nav-dot { opacity: 1; }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    margin-left: 280px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '</php>';
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 120px;
+    font-weight: 700;
+    color: rgba(0,212,255,0.04);
+    letter-spacing: -4px;
+    user-select: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    letter-spacing: -2px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── CONTENT SECTIONS ─── */
+  .content {
+    padding: 0 60px 80px;
+  }
+
+  .section {
+    padding-top: 64px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 64px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 6px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    margin-top: 6px;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  .section h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 32px 0 16px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section h3::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section p {
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+    position: relative;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .code-copy {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .code-copy:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .kw { color: #ff79c6; }        /* keywords */
+  .fn { color: #50fa7b; }        /* functions */
+  .str { color: #f1fa8c; }       /* strings */
+  .num { color: #bd93f9; }       /* numbers */
+  .cmt { color: #6272a4; font-style: italic; } /* comments */
+  .var { color: #8be9fd; }       /* variables */
+  .op { color: #ff79c6; }        /* operators */
+  .cls { color: #ffb86c; }       /* class names */
+  .tag { color: #ff79c6; }       /* HTML tags */
+  .attr { color: #50fa7b; }      /* HTML attributes */
+  .val { color: #f1fa8c; }       /* HTML values */
+
+  /* ─── CARDS ─── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: rgba(0,212,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  .card-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th {
+    background: var(--surface);
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+
+  tr:hover td { background: rgba(0,212,255,0.02); }
+
+  td code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* ─── CALLOUTS ─── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .callout.info {
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.15);
+    color: #93c5fd;
+  }
+
+  .callout.warn {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    color: #fcd34d;
+  }
+
+  .callout.tip {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.2);
+    color: #6ee7b7;
+  }
+
+  .callout.danger {
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #fca5a5;
+  }
+
+  /* ─── INLINE CODE ─── */
+  :not(pre) > code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+
+  /* ─── TAGS ─── */
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .tag-pill {
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.25);
+    color: #c4b5fd;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ─── QUIZ SECTION ─── */
+  .quiz {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin: 32px 0;
+  }
+
+  .quiz h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quiz-item {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quiz-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .quiz-q {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+  .quiz-opt {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-opt.correct { border-color: var(--accent3); background: rgba(16,185,129,0.1); color: var(--accent3); }
+  .quiz-opt.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); color: var(--danger); }
+
+  /* ─── PROGRESS ─── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  /* ─── TOC CHIPS ─── */
+  .toc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0;
+  }
+
+  .toc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .toc-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .toc-chip .chip-num {
+    color: var(--text-muted);
+    font-size: 10px;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 32px 60px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { padding: 40px 24px 32px; }
+    .hero h1 { font-size: 36px; }
+    .content { padding: 0 24px 60px; }
+    .hero::after { display: none; }
+    .footer { padding: 24px; flex-direction: column; gap: 8px; }
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  #scroll-progress {
+    position: fixed;
+    top: 0; left: 280px; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 200;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  @media (max-width: 900px) {
+    #scroll-progress { left: 0; }
+  }
+
+  /* ─── TWO COL ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 700px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* ─── LIST ─── */
+  .styled-list {
+    list-style: none;
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .styled-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .styled-list li::before {
+    content: '▸';
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div id="scroll-progress"></div>
+
+<!-- ═══════════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">PHP</div>
+    <div>
+      <div class="logo-text">PHP Master</div>
+      <div class="logo-sub">BTS SIO — Cours Complet</div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Fondamentaux</div>
+      <a href="#archi" class="nav-item"><span class="num">01</span><div class="nav-dot"></div>Architecture Web</a>
+      <a href="#bases" class="nav-item"><span class="num">02</span><div class="nav-dot"></div>Bases PHP</a>
+      <a href="#controle" class="nav-item"><span class="num">03</span><div class="nav-dot"></div>Structures de contrôle</a>
+      <a href="#fonctions" class="nav-item"><span class="num">04</span><div class="nav-dot"></div>Fonctions</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Web & Données</div>
+      <a href="#formulaires" class="nav-item"><span class="num">05</span><div class="nav-dot"></div>Formulaires GET/POST</a>
+      <a href="#sessions" class="nav-item"><span class="num">06</span><div class="nav-dot"></div>Sessions & Cookies</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">POO</div>
+      <a href="#poo" class="nav-item"><span class="num">07</span><div class="nav-dot"></div>POO PHP</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Front-End</div>
+      <a href="#html" class="nav-item"><span class="num">08</span><div class="nav-dot"></div>HTML</a>
+      <a href="#css" class="nav-item"><span class="num">09</span><div class="nav-dot"></div>CSS</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Révisions</div>
+      <a href="#quiz" class="nav-item"><span class="num">✦</span><div class="nav-dot"></div>QCM Révision</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ MAIN ═══════════════════════════════════ -->
+<main class="main">
+
+  <!-- ─── HERO ─── -->
+  <div class="hero">
+    <div class="hero-badge">BTS SIO — Épreuve Blanc · PHP &amp; Web</div>
+    <h1>Maîtriser <span>PHP</span><br>pour le BTS blanc</h1>
+    <p>Cours complet couvrant toutes les notions du programme — de l'architecture web à la POO en passant par les formulaires, sessions, HTML et CSS.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-value">9</div><div class="stat-label">Chapitres</div></div>
+      <div class="stat"><div class="stat-value">50+</div><div class="stat-label">Exemples de code</div></div>
+      <div class="stat"><div class="stat-value">QCM</div><div class="stat-label">Auto-évaluation</div></div>
+    </div>
+  </div>
+
+  <!-- ─── CONTENT ─── -->
+  <div class="content">
+
+    <!-- ══════════════════════ 01 — ARCHITECTURE WEB ══════════════════════ -->
+    <section class="section" id="archi">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Architecture Web</h2>
+      </div>
+
+      <h3>URL — Anatomie</h3>
+      <p>Une URL (Uniform Resource Locator) identifie de manière unique une ressource sur le web. Elle se décompose en plusieurs parties :</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-lang">URL</span>
+          <button class="code-copy" onclick="copyCode(this)">copier</button>
+        </div>
+        <pre>https://www.monsite.fr:443/dossier/page.php?id=5&amp;cat=info#section
+
+<span class="cmt">│ protocole │   domaine    │port│   chemin   │   paramètres GET  │ ancre│</span></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <tr><th>Partie</th><th>Valeur</th><th>Description</th></tr>
+          <tr><td>Protocole</td><td><code>https://</code></td><td>HTTP sécurisé (SSL/TLS)</td></tr>
+          <tr><td>Domaine</td><td><code>www.monsite.fr</code></td><td>Nom de domaine du serveur</td></tr>
+          <tr><td>Port</td><td><code>:443</code></td><td>443 = HTTPS, 80 = HTTP (optionnel si standard)</td></tr>
+          <tr><td>Chemin</td><td><code>/dossier/page.php</code></td><td>Emplacement du fichier</td></tr>
+          <tr><td>Query string</td><td><code>?id=5&amp;cat=info</code></td><td>Paramètres GET</td></tr>
+          <tr><td>Ancre</td><td><code>#section</code></td><td>Lien vers une section (côté client uniquement)</td></tr>
+        </table>
+      </div>
+
+      <h3>Protocole HTTP — Requête / Réponse</h3>
+      <p>HTTP (HyperText Transfer Protocol) est le protocole de communication entre le client (navigateur) et le serveur. C'est un protocole <strong>sans état</strong> (stateless).</p>
+
+      <div class="two-col">
+        <div class="code-block">
+          <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">Requête HTTP</span></div>
+          <pre><span class="kw">GET</span> /page.php?id=1 HTTP/1.1
+Host: monsite.fr
+Accept: text/html
+Cookie: session_id=abc123</pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">Réponse HTTP</span></div>
+          <pre>HTTP/1.1 <span class="num">200</span> OK
+Content-Type: text/html; charset=UTF-8
+Set-Cookie: session_id=abc123
+
+&lt;html&gt;...&lt;/html&gt;</pre>
+        </div>
+      </div>
+
+      <h3>Codes de statut HTTP</h3>
+      <div class="cards">
+        <div class="card"><div class="card-icon">✅</div><h4>2xx — Succès</h4><p><code>200 OK</code> — Réponse normale<br><code>201 Created</code> — Ressource créée</p></div>
+        <div class="card"><div class="card-icon">↪️</div><h4>3xx — Redirection</h4><p><code>301 Moved Permanently</code><br><code>302 Found</code> (redirect temporaire)</p></div>
+        <div class="card"><div class="card-icon">❌</div><h4>4xx — Erreur client</h4><p><code>400 Bad Request</code><br><code>403 Forbidden</code> / <code>404 Not Found</code></p></div>
+        <div class="card"><div class="card-icon">💥</div><h4>5xx — Erreur serveur</h4><p><code>500 Internal Server Error</code><br><code>503 Service Unavailable</code></p></div>
+      </div>
+
+      <h3>Architecture Client-Serveur</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">Flux</span></div>
+        <pre><span class="cmt">┌──────────────┐   Requête HTTP GET/POST    ┌──────────────────┐</span>
+<span class="cmt">│   NAVIGATEUR │  ─────────────────────── ▶ │   SERVEUR WEB    │</span>
+<span class="cmt">│   (Client)   │                            │  (Apache/Nginx)  │</span>
+<span class="cmt">│              │ ◀ ───────────────────────  │       ↕          │</span>
+<span class="cmt">│  HTML rendu  │   Réponse HTML/CSS/JS      │  Interpréteur PHP│</span>
+<span class="cmt">└──────────────┘                            │       ↕          │</span>
+<span class="cmt">                                            │  Base de données │</span>
+<span class="cmt">                                            └──────────────────┘</span></pre>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <div>PHP s'exécute côté <strong>serveur</strong>. Le client ne voit jamais le code PHP, uniquement le HTML généré. C'est la différence fondamentale avec JavaScript qui s'exécute côté client.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 02 — BASES PHP ══════════════════════ -->
+    <section class="section" id="bases">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Bases PHP</h2>
+      </div>
+
+      <h3>Syntaxe de base</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// Balises PHP obligatoires</span>
+<span class="fn">echo</span> <span class="str">"Hello, World!"</span>;   <span class="cmt">// affiche du texte</span>
+<span class="fn">echo</span> <span class="str">"Bonjour"</span> . <span class="str">" "</span> . <span class="str">"PHP"</span>; <span class="cmt">// concaténation avec .</span>
+<span class="fn">print</span> <span class="str">"aussi valide"</span>;    <span class="cmt">// identique à echo</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Variables et Types</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Types</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// Les variables commencent TOUJOURS par $</span>
+<span class="var">$entier</span>   = <span class="num">42</span>;           <span class="cmt">// int</span>
+<span class="var">$decimal</span>  = <span class="num">3.14</span>;         <span class="cmt">// float</span>
+<span class="var">$texte</span>    = <span class="str">"Bonjour"</span>;    <span class="cmt">// string</span>
+<span class="var">$booleen</span>  = <span class="kw">true</span>;         <span class="cmt">// bool</span>
+<span class="var">$vide</span>     = <span class="kw">null</span>;         <span class="cmt">// null</span>
+
+<span class="cmt">// Vérifier le type</span>
+<span class="fn">gettype</span>(<span class="var">$entier</span>);          <span class="cmt">// "integer"</span>
+<span class="fn">is_int</span>(<span class="var">$entier</span>);           <span class="cmt">// true</span>
+<span class="fn">is_string</span>(<span class="var">$texte</span>);        <span class="cmt">// true</span>
+<span class="fn">var_dump</span>(<span class="var">$decimal</span>);       <span class="cmt">// float(3.14)</span>
+
+<span class="cmt">// Conversion (casting)</span>
+<span class="var">$str</span> = (<span class="kw">string</span>) <span class="num">42</span>;       <span class="cmt">// "42"</span>
+<span class="var">$int</span> = (<span class="kw">int</span>) <span class="str">"12abc"</span>;     <span class="cmt">// 12</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Chaînes de caractères</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Strings</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="var">$prenom</span> = <span class="str">"Alice"</span>;
+<span class="var">$age</span>    = <span class="num">20</span>;
+
+<span class="cmt">// Guillemets doubles : interpolation des variables</span>
+<span class="fn">echo</span> <span class="str">"Bonjour <span class="var">$prenom</span>, tu as <span class="var">$age</span> ans"</span>;
+
+<span class="cmt">// Guillemets simples : texte brut (plus rapide)</span>
+<span class="fn">echo</span> <span class="str">'Bonjour $prenom'</span>;   <span class="cmt">// affiche: Bonjour $prenom</span>
+
+<span class="cmt">// Fonctions utiles</span>
+<span class="fn">strlen</span>(<span class="var">$prenom</span>);          <span class="cmt">// 5 (longueur)</span>
+<span class="fn">strtoupper</span>(<span class="var">$prenom</span>);     <span class="cmt">// ALICE</span>
+<span class="fn">strtolower</span>(<span class="var">$prenom</span>);     <span class="cmt">// alice</span>
+<span class="fn">str_replace</span>(<span class="str">"A"</span>, <span class="str">"a"</span>, <span class="var">$prenom</span>); <span class="cmt">// alice</span>
+<span class="fn">substr</span>(<span class="var">$prenom</span>, <span class="num">0</span>, <span class="num">3</span>);   <span class="cmt">// Ali</span>
+<span class="fn">strpos</span>(<span class="var">$prenom</span>, <span class="str">"l"</span>);    <span class="cmt">// 1 (position)</span>
+<span class="fn">trim</span>(<span class="str">"  texte  "</span>);       <span class="cmt">// "texte" (supprime espaces)</span>
+<span class="fn">explode</span>(<span class="str">","</span>, <span class="str">"a,b,c"</span>);  <span class="cmt">// ["a","b","c"]</span>
+<span class="fn">implode</span>(<span class="str">"-"</span>, [<span class="str">"a"</span>,<span class="str">"b"</span>]); <span class="cmt">// "a-b"</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Opérateurs</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Catégorie</th><th>Opérateurs</th><th>Exemple</th><th>Résultat</th></tr>
+          <tr><td>Arithmétiques</td><td><code>+ - * / % **</code></td><td><code>10 % 3</code></td><td>1</td></tr>
+          <tr><td>Comparaison</td><td><code>== != === !== &lt; &gt; &lt;= &gt;=</code></td><td><code>"3" == 3</code></td><td>true</td></tr>
+          <tr><td>Identité stricte</td><td><code>=== !==</code></td><td><code>"3" === 3</code></td><td>false (types différents)</td></tr>
+          <tr><td>Logiques</td><td><code>&amp;&amp; || ! and or</code></td><td><code>true &amp;&amp; false</code></td><td>false</td></tr>
+          <tr><td>Concaténation</td><td><code>. .=</code></td><td><code>"a" . "b"</code></td><td>"ab"</td></tr>
+          <tr><td>Ternaire</td><td><code>? :</code></td><td><code>$x > 0 ? "pos" : "neg"</code></td><td>"pos" si x > 0</td></tr>
+          <tr><td>Null coalescent</td><td><code>??</code></td><td><code>$a ?? "défaut"</code></td><td>"défaut" si $a est null</td></tr>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div><strong>== vs ===</strong> : <code>==</code> compare les valeurs (avec conversion de type), <code>===</code> compare valeur ET type. Préférez toujours <code>===</code> pour éviter les bugs.</div>
+      </div>
+
+      <h3>Tableaux (Arrays)</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Arrays</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// ── Tableau indexé (indices numériques) ──</span>
+<span class="var">$fruits</span> = [<span class="str">"pomme"</span>, <span class="str">"banane"</span>, <span class="str">"cerise"</span>];
+<span class="fn">echo</span> <span class="var">$fruits</span>[<span class="num">0</span>];           <span class="cmt">// pomme</span>
+<span class="var">$fruits</span>[] = <span class="str">"datte"</span>;       <span class="cmt">// ajout à la fin</span>
+
+<span class="cmt">// ── Tableau associatif (clé => valeur) ──</span>
+<span class="var">$personne</span> = [
+    <span class="str">"nom"</span>    => <span class="str">"Dupont"</span>,
+    <span class="str">"prenom"</span> => <span class="str">"Jean"</span>,
+    <span class="str">"age"</span>    => <span class="num">25</span>
+];
+<span class="fn">echo</span> <span class="var">$personne</span>[<span class="str">"nom"</span>];      <span class="cmt">// Dupont</span>
+
+<span class="cmt">// ── Tableau multidimensionnel ──</span>
+<span class="var">$eleves</span> = [
+    [<span class="str">"nom"</span> => <span class="str">"Alice"</span>, <span class="str">"note"</span> => <span class="num">18</span>],
+    [<span class="str">"nom"</span> => <span class="str">"Bob"</span>,   <span class="str">"note"</span> => <span class="num">14</span>]
+];
+<span class="fn">echo</span> <span class="var">$eleves</span>[<span class="num">0</span>][<span class="str">"note"</span>];   <span class="cmt">// 18</span>
+
+<span class="cmt">// ── Fonctions sur les tableaux ──</span>
+<span class="fn">count</span>(<span class="var">$fruits</span>);           <span class="cmt">// 4</span>
+<span class="fn">sort</span>(<span class="var">$fruits</span>);            <span class="cmt">// tri croissant</span>
+<span class="fn">rsort</span>(<span class="var">$fruits</span>);           <span class="cmt">// tri décroissant</span>
+<span class="fn">asort</span>(<span class="var">$personne</span>);        <span class="cmt">// tri assoc par valeur</span>
+<span class="fn">ksort</span>(<span class="var">$personne</span>);        <span class="cmt">// tri assoc par clé</span>
+<span class="fn">array_push</span>(<span class="var">$fruits</span>, <span class="str">"kiwi"</span>); <span class="cmt">// ajout fin</span>
+<span class="fn">array_pop</span>(<span class="var">$fruits</span>);      <span class="cmt">// supprime dernier</span>
+<span class="fn">in_array</span>(<span class="str">"pomme"</span>, <span class="var">$fruits</span>); <span class="cmt">// true</span>
+<span class="fn">array_key_exists</span>(<span class="str">"nom"</span>, <span class="var">$personne</span>); <span class="cmt">// true</span>
+<span class="fn">array_keys</span>(<span class="var">$personne</span>);   <span class="cmt">// ["nom","prenom","age"]</span>
+<span class="fn">array_values</span>(<span class="var">$personne</span>); <span class="cmt">// ["Dupont","Jean",25]</span>
+<span class="fn">array_merge</span>(<span class="var">$fruits</span>, [<span class="str">"mangue"</span>]); <span class="cmt">// fusion</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 03 — STRUCTURES DE CONTRÔLE ══════════════════════ -->
+    <section class="section" id="controle">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Structures de contrôle</h2>
+      </div>
+
+      <h3>Conditions — if / elseif / else</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="var">$note</span> = <span class="num">14</span>;
+
+<span class="kw">if</span> (<span class="var">$note</span> >= <span class="num">16</span>) {
+    <span class="fn">echo</span> <span class="str">"Très bien"</span>;
+} <span class="kw">elseif</span> (<span class="var">$note</span> >= <span class="num">12</span>) {
+    <span class="fn">echo</span> <span class="str">"Bien"</span>;
+} <span class="kw">elseif</span> (<span class="var">$note</span> >= <span class="num">10</span>) {
+    <span class="fn">echo</span> <span class="str">"Passable"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">echo</span> <span class="str">"Insuffisant"</span>;
+}
+
+<span class="cmt">// Opérateur ternaire (raccourci)</span>
+<span class="var">$statut</span> = (<span class="var">$note</span> >= <span class="num">10</span>) ? <span class="str">"Reçu"</span> : <span class="str">"Refusé"</span>;
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Switch</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="var">$jour</span> = <span class="str">"lundi"</span>;
+
+<span class="kw">switch</span> (<span class="var">$jour</span>) {
+    <span class="kw">case</span> <span class="str">"lundi"</span>:
+    <span class="kw">case</span> <span class="str">"mardi"</span>:
+        <span class="fn">echo</span> <span class="str">"Début de semaine"</span>;
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">"vendredi"</span>:
+        <span class="fn">echo</span> <span class="str">"Fin de semaine"</span>;
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="fn">echo</span> <span class="str">"Milieu de semaine"</span>;
+}
+<span class="cmt">// ⚠️ Attention : sans break, l'exécution "tombe" dans le cas suivant !</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Boucles</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Boucles</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// ── for : quand on connaît le nombre d'itérations ──</span>
+<span class="kw">for</span> (<span class="var">$i</span> = <span class="num">0</span>; <span class="var">$i</span> < <span class="num">5</span>; <span class="var">$i</span>++) {
+    <span class="fn">echo</span> <span class="var">$i</span> . <span class="str">" "</span>;  <span class="cmt">// 0 1 2 3 4</span>
+}
+
+<span class="cmt">// ── while : tant qu'une condition est vraie ──</span>
+<span class="var">$compteur</span> = <span class="num">0</span>;
+<span class="kw">while</span> (<span class="var">$compteur</span> < <span class="num">3</span>) {
+    <span class="fn">echo</span> <span class="var">$compteur</span>;
+    <span class="var">$compteur</span>++;   <span class="cmt">// ne pas oublier l'incrémentation !</span>
+}
+
+<span class="cmt">// ── do...while : s'exécute AU MOINS une fois ──</span>
+<span class="kw">do</span> {
+    <span class="fn">echo</span> <span class="str">"Exécuté"</span>;
+    <span class="var">$compteur</span>++;
+} <span class="kw">while</span> (<span class="var">$compteur</span> < <span class="num">3</span>);
+
+<span class="cmt">// ── foreach : parcours de tableaux ──</span>
+<span class="var">$fruits</span> = [<span class="str">"pomme"</span>, <span class="str">"banane"</span>, <span class="str">"cerise"</span>];
+<span class="kw">foreach</span> (<span class="var">$fruits</span> <span class="kw">as</span> <span class="var">$fruit</span>) {
+    <span class="fn">echo</span> <span class="var">$fruit</span>;
+}
+
+<span class="cmt">// foreach avec clé => valeur</span>
+<span class="var">$personne</span> = [<span class="str">"nom"</span> => <span class="str">"Alice"</span>, <span class="str">"age"</span> => <span class="num">20</span>];
+<span class="kw">foreach</span> (<span class="var">$personne</span> <span class="kw">as</span> <span class="var">$cle</span> => <span class="var">$valeur</span>) {
+    <span class="fn">echo</span> <span class="str">"<span class="var">$cle</span> : <span class="var">$valeur</span>"</span>;
+}
+
+<span class="cmt">// break et continue</span>
+<span class="kw">for</span> (<span class="var">$i</span> = <span class="num">0</span>; <span class="var">$i</span> < <span class="num">10</span>; <span class="var">$i</span>++) {
+    <span class="kw">if</span> (<span class="var">$i</span> == <span class="num">3</span>) <span class="kw">continue</span>; <span class="cmt">// saute le 3</span>
+    <span class="kw">if</span> (<span class="var">$i</span> == <span class="num">6</span>) <span class="kw">break</span>;    <span class="cmt">// arrête à 6</span>
+}
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <tr><th>Boucle</th><th>Utilisation</th><th>Quand utiliser ?</th></tr>
+          <tr><td><code>for</code></td><td>Compteur explicite</td><td>Nombre d'itérations connu</td></tr>
+          <tr><td><code>while</code></td><td>Condition de sortie</td><td>Nombre inconnu, condition à vérifier avant</td></tr>
+          <tr><td><code>do...while</code></td><td>Exécution garantie</td><td>Au moins une exécution requise</td></tr>
+          <tr><td><code>foreach</code></td><td>Parcours de tableaux</td><td>Itérer sur tous les éléments d'un array</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 04 — FONCTIONS ══════════════════════ -->
+    <section class="section" id="fonctions">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Fonctions PHP</h2>
+      </div>
+
+      <h3>Déclaration et appel</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// ── Fonction simple ──</span>
+<span class="kw">function</span> <span class="fn">direBonjour</span>() {
+    <span class="fn">echo</span> <span class="str">"Bonjour !"</span>;
+}
+<span class="fn">direBonjour</span>();   <span class="cmt">// appel</span>
+
+<span class="cmt">// ── Fonction avec paramètres ──</span>
+<span class="kw">function</span> <span class="fn">additionner</span>(<span class="var">$a</span>, <span class="var">$b</span>) {
+    <span class="kw">return</span> <span class="var">$a</span> + <span class="var">$b</span>;
+}
+<span class="var">$resultat</span> = <span class="fn">additionner</span>(<span class="num">5</span>, <span class="num">3</span>);  <span class="cmt">// 8</span>
+
+<span class="cmt">// ── Valeurs par défaut ──</span>
+<span class="kw">function</span> <span class="fn">saluer</span>(<span class="var">$prenom</span>, <span class="var">$titre</span> = <span class="str">"M."</span>) {
+    <span class="kw">return</span> <span class="str">"Bonjour <span class="var">$titre</span> <span class="var">$prenom</span>"</span>;
+}
+<span class="fn">echo</span> <span class="fn">saluer</span>(<span class="str">"Dupont"</span>);         <span class="cmt">// Bonjour M. Dupont</span>
+<span class="fn">echo</span> <span class="fn">saluer</span>(<span class="str">"Martin"</span>, <span class="str">"Mme"</span>);  <span class="cmt">// Bonjour Mme Martin</span>
+
+<span class="cmt">// ── Passage par référence (& modifie l'original) ──</span>
+<span class="kw">function</span> <span class="fn">doubler</span>(&<span class="var">$val</span>) {
+    <span class="var">$val</span> *= <span class="num">2</span>;
+}
+<span class="var">$x</span> = <span class="num">5</span>;
+<span class="fn">doubler</span>(<span class="var">$x</span>);
+<span class="fn">echo</span> <span class="var">$x</span>;   <span class="cmt">// 10</span>
+
+<span class="cmt">// ── Typage PHP 7+ ──</span>
+<span class="kw">function</span> <span class="fn">diviser</span>(<span class="kw">float</span> <span class="var">$a</span>, <span class="kw">float</span> <span class="var">$b</span>): <span class="kw">float</span> {
+    <span class="kw">if</span> (<span class="var">$b</span> === <span class="num">0.0</span>) <span class="kw">return</span> <span class="num">0.0</span>;
+    <span class="kw">return</span> <span class="var">$a</span> / <span class="var">$b</span>;
+}
+
+<span class="cmt">// ── Portée des variables ──</span>
+<span class="var">$globale</span> = <span class="str">"Je suis globale"</span>;
+
+<span class="kw">function</span> <span class="fn">test</span>() {
+    <span class="kw">global</span> <span class="var">$globale</span>;   <span class="cmt">// accès à la variable globale</span>
+    <span class="fn">echo</span> <span class="var">$globale</span>;
+}
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Fonctions utiles PHP natives</h3>
+      <div class="cards">
+        <div class="card"><div class="card-icon">🔢</div><h4>Math</h4><p><code>abs()</code> <code>round()</code> <code>floor()</code> <code>ceil()</code> <code>max()</code> <code>min()</code> <code>rand()</code> <code>pow()</code></p></div>
+        <div class="card"><div class="card-icon">📅</div><h4>Date</h4><p><code>date("d/m/Y")</code> <code>time()</code> <code>mktime()</code> <code>strtotime()</code></p></div>
+        <div class="card"><div class="card-icon">🔒</div><h4>Sécurité</h4><p><code>htmlspecialchars()</code> <code>strip_tags()</code> <code>password_hash()</code> <code>password_verify()</code></p></div>
+        <div class="card"><div class="card-icon">📁</div><h4>Fichiers</h4><p><code>file_get_contents()</code> <code>file_put_contents()</code> <code>fopen()</code> <code>fclose()</code></p></div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 05 — FORMULAIRES ══════════════════════ -->
+    <section class="section" id="formulaires">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Formulaires GET / POST</h2>
+      </div>
+
+      <h3>Formulaire HTML</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">HTML</span></div>
+        <pre><span class="cmt">&lt;!-- action = fichier qui traite, method = GET ou POST --&gt;</span>
+<span class="tag">&lt;form</span> <span class="attr">action</span>=<span class="val">"traitement.php"</span> <span class="attr">method</span>=<span class="val">"POST"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"text"</span>     <span class="attr">name</span>=<span class="val">"nom"</span>      <span class="attr">placeholder</span>=<span class="val">"Votre nom"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"email"</span>    <span class="attr">name</span>=<span class="val">"email"</span>    <span class="attr">required</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"password"</span> <span class="attr">name</span>=<span class="val">"mdp"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"number"</span>   <span class="attr">name</span>=<span class="val">"age"</span>    <span class="attr">min</span>=<span class="val">"0"</span> <span class="attr">max</span>=<span class="val">"120"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;select</span> <span class="attr">name</span>=<span class="val">"ville"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="val">"paris"</span><span class="tag">&gt;</span>Paris<span class="tag">&lt;/option&gt;</span>
+        <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="val">"lyon"</span><span class="tag">&gt;</span>Lyon<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;/select&gt;</span>
+    <span class="tag">&lt;textarea</span> <span class="attr">name</span>=<span class="val">"message"</span> <span class="attr">rows</span>=<span class="val">"4"</span><span class="tag">&gt;&lt;/textarea&gt;</span>
+    <span class="cmt">&lt;!-- cases à cocher --&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"checkbox"</span> <span class="attr">name</span>=<span class="val">"cgv"</span> <span class="attr">value</span>=<span class="val">"1"</span><span class="tag">&gt;</span>
+    <span class="cmt">&lt;!-- boutons radio --&gt;</span>
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"radio"</span> <span class="attr">name</span>=<span class="val">"genre"</span> <span class="attr">value</span>=<span class="val">"H"</span><span class="tag">&gt;</span> Homme
+    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"radio"</span> <span class="attr">name</span>=<span class="val">"genre"</span> <span class="attr">value</span>=<span class="val">"F"</span><span class="tag">&gt;</span> Femme
+    <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="val">"submit"</span><span class="tag">&gt;</span>Envoyer<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></pre>
+      </div>
+
+      <h3>Traitement PHP</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">traitement.php</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// ─ Récupération des données ─</span>
+<span class="var">$nom</span>   = <span class="var">$_POST</span>[<span class="str">"nom"</span>];    <span class="cmt">// méthode POST</span>
+<span class="var">$id</span>    = <span class="var">$_GET</span>[<span class="str">"id"</span>];     <span class="cmt">// méthode GET</span>
+
+<span class="cmt">// ─ Vérifier si le formulaire a été soumis ─</span>
+<span class="kw">if</span> (<span class="var">$_SERVER</span>[<span class="str">"REQUEST_METHOD"</span>] === <span class="str">"POST"</span>) {
+    <span class="cmt">// Traitement du formulaire</span>
+}
+
+<span class="cmt">// ─ Vérifier qu'un champ existe et n'est pas vide ─</span>
+<span class="kw">if</span> (<span class="fn">isset</span>(<span class="var">$_POST</span>[<span class="str">"nom"</span>]) && !<span class="fn">empty</span>(<span class="var">$_POST</span>[<span class="str">"nom"</span>])) {
+    <span class="var">$nom</span> = <span class="fn">htmlspecialchars</span>(<span class="var">$_POST</span>[<span class="str">"nom"</span>]);
+    <span class="cmt">// htmlspecialchars() protège contre les injections XSS</span>
+}
+
+<span class="cmt">// ─ Redirection après traitement ─</span>
+<span class="fn">header</span>(<span class="str">"Location: succès.php"</span>);
+<span class="kw">exit</span>();   <span class="cmt">// toujours après header()</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <div class="two-col">
+        <div class="card" style="background:var(--surface2)">
+          <h4>📤 Méthode GET</h4>
+          <ul class="styled-list">
+            <li>Données visibles dans l'URL</li>
+            <li>Limité ~2000 caractères</li>
+            <li>Peut être mis en favori / partagé</li>
+            <li>Idéal : recherche, filtres, pagination</li>
+            <li>Ne pas utiliser pour données sensibles</li>
+          </ul>
+        </div>
+        <div class="card" style="background:var(--surface2)">
+          <h4>📬 Méthode POST</h4>
+          <ul class="styled-list">
+            <li>Données dans le corps de la requête</li>
+            <li>Pas de limite de taille notable</li>
+            <li>Non mémorisé dans l'URL</li>
+            <li>Idéal : connexion, inscription, paiement</li>
+            <li>À utiliser pour données sensibles</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        <span class="callout-icon">🛡️</span>
+        <div><strong>Sécurité :</strong> Ne JAMAIS utiliser directement les données utilisateur dans du SQL ou du HTML. Toujours utiliser <code>htmlspecialchars()</code> pour l'affichage et les requêtes préparées pour la base de données.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 06 — SESSIONS & COOKIES ══════════════════════ -->
+    <section class="section" id="sessions">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>Sessions &amp; Cookies</h2>
+      </div>
+
+      <h3>Sessions</h3>
+      <p>Une session permet de stocker des informations côté <strong>serveur</strong>, identifiées par un ID unique (PHPSESSID) stocké dans un cookie côté client.</p>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Sessions</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// ⚠️ session_start() doit être la PREMIÈRE chose du fichier</span>
+<span class="fn">session_start</span>();
+
+<span class="cmt">// ─ Écrire en session ─</span>
+<span class="var">$_SESSION</span>[<span class="str">"utilisateur"</span>] = <span class="str">"Alice"</span>;
+<span class="var">$_SESSION</span>[<span class="str">"role"</span>]         = <span class="str">"admin"</span>;
+<span class="var">$_SESSION</span>[<span class="str">"panier"</span>]       = [<span class="str">"item1"</span>, <span class="str">"item2"</span>];
+
+<span class="cmt">// ─ Lire en session ─</span>
+<span class="kw">if</span> (<span class="fn">isset</span>(<span class="var">$_SESSION</span>[<span class="str">"utilisateur"</span>])) {
+    <span class="fn">echo</span> <span class="str">"Connecté : "</span> . <span class="var">$_SESSION</span>[<span class="str">"utilisateur"</span>];
+}
+
+<span class="cmt">// ─ Supprimer une variable de session ─</span>
+<span class="fn">unset</span>(<span class="var">$_SESSION</span>[<span class="str">"panier"</span>]);
+
+<span class="cmt">// ─ Détruire toute la session (déconnexion) ─</span>
+<span class="fn">session_start</span>();
+<span class="fn">session_unset</span>();   <span class="cmt">// vide toutes les variables</span>
+<span class="fn">session_destroy</span>(); <span class="cmt">// détruit la session</span>
+
+<span class="cmt">// ─ Vérification connexion (page protégée) ─</span>
+<span class="kw">if</span> (!<span class="fn">isset</span>(<span class="var">$_SESSION</span>[<span class="str">"utilisateur"</span>])) {
+    <span class="fn">header</span>(<span class="str">"Location: connexion.php"</span>);
+    <span class="kw">exit</span>();
+}
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Cookies</h3>
+      <p>Un cookie est stocké côté <strong>client</strong> (navigateur). Il peut persister après la fermeture du navigateur.</p>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Cookies</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// setcookie(nom, valeur, expiration, chemin, domaine, sécurisé, httponly)</span>
+
+<span class="cmt">// ─ Créer un cookie (expire dans 30 jours) ─</span>
+<span class="fn">setcookie</span>(<span class="str">"theme"</span>, <span class="str">"dark"</span>, <span class="fn">time</span>() + (<span class="num">30</span> * <span class="num">24</span> * <span class="num">3600</span>), <span class="str">"/"</span>);
+
+<span class="cmt">// ─ Lire un cookie ─</span>
+<span class="kw">if</span> (<span class="fn">isset</span>(<span class="var">$_COOKIE</span>[<span class="str">"theme"</span>])) {
+    <span class="var">$theme</span> = <span class="var">$_COOKIE</span>[<span class="str">"theme"</span>];
+}
+
+<span class="cmt">// ─ Supprimer un cookie (expiration dans le passé) ─</span>
+<span class="fn">setcookie</span>(<span class="str">"theme"</span>, <span class="str">""</span>, <span class="fn">time</span>() - <span class="num">3600</span>);
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <tr><th>Critère</th><th>Session</th><th>Cookie</th></tr>
+          <tr><td>Stockage</td><td>Côté serveur</td><td>Côté client (navigateur)</td></tr>
+          <tr><td>Durée</td><td>Tant que le navigateur est ouvert (par défaut)</td><td>Définie par setcookie()</td></tr>
+          <tr><td>Sécurité</td><td>Plus sécurisée (données non visibles)</td><td>Moins sécurisée (visible)</td></tr>
+          <tr><td>Taille</td><td>Illimitée (côté serveur)</td><td>Limité à ~4Ko</td></tr>
+          <tr><td>Usage typique</td><td>Authentification, panier</td><td>Préférences, "Se souvenir de moi"</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 07 — POO ══════════════════════ -->
+    <section class="section" id="poo">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>POO — Programmation Orientée Objet</h2>
+      </div>
+
+      <h3>Classe, attributs, méthodes, constructeur</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Classe de base</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="kw">class</span> <span class="cls">Voiture</span> {
+    <span class="cmt">// ─ Attributs (propriétés) ─</span>
+    <span class="kw">private</span> <span class="kw">string</span> <span class="var">$marque</span>;
+    <span class="kw">private</span> <span class="kw">string</span> <span class="var">$couleur</span>;
+    <span class="kw">protected</span> <span class="kw">int</span>    <span class="var">$vitesse</span> = <span class="num">0</span>;
+    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="var">$nbVoitures</span> = <span class="num">0</span>;  <span class="cmt">// attribut statique</span>
+
+    <span class="cmt">// ─ Constructeur ─</span>
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">string</span> <span class="var">$marque</span>, <span class="kw">string</span> <span class="var">$couleur</span>) {
+        <span class="var">$this</span>-><span class="var">marque</span>  = <span class="var">$marque</span>;
+        <span class="var">$this</span>-><span class="var">couleur</span> = <span class="var">$couleur</span>;
+        <span class="cls">Voiture</span>::<span class="var">$nbVoitures</span>++;   <span class="cmt">// incrémente le compteur statique</span>
+    }
+
+    <span class="cmt">// ─ Getters (accesseurs) ─</span>
+    <span class="kw">public function</span> <span class="fn">getMarque</span>(): <span class="kw">string</span>  { <span class="kw">return</span> <span class="var">$this</span>-><span class="var">marque</span>; }
+    <span class="kw">public function</span> <span class="fn">getCouleur</span>(): <span class="kw">string</span> { <span class="kw">return</span> <span class="var">$this</span>-><span class="var">couleur</span>; }
+    <span class="kw">public function</span> <span class="fn">getVitesse</span>(): <span class="kw">int</span>    { <span class="kw">return</span> <span class="var">$this</span>-><span class="var">vitesse</span>; }
+
+    <span class="cmt">// ─ Setters (mutateurs) ─</span>
+    <span class="kw">public function</span> <span class="fn">setCouleur</span>(<span class="kw">string</span> <span class="var">$couleur</span>): <span class="kw">void</span> {
+        <span class="var">$this</span>-><span class="var">couleur</span> = <span class="var">$couleur</span>;
+    }
+
+    <span class="cmt">// ─ Méthodes ─</span>
+    <span class="kw">public function</span> <span class="fn">accelerer</span>(<span class="kw">int</span> <span class="var">$km</span>): <span class="kw">void</span> {
+        <span class="var">$this</span>-><span class="var">vitesse</span> += <span class="var">$km</span>;
+    }
+
+    <span class="kw">public function</span> <span class="fn">freiner</span>(): <span class="kw">void</span> {
+        <span class="var">$this</span>-><span class="var">vitesse</span> = <span class="num">0</span>;
+    }
+
+    <span class="kw">public function</span> <span class="fn">afficher</span>(): <span class="kw">string</span> {
+        <span class="kw">return</span> <span class="str">"<span class="var">{$this->marque}</span> <span class="var">{$this->couleur}</span> — <span class="var">{$this->vitesse}</span> km/h"</span>;
+    }
+
+    <span class="cmt">// ─ Méthode statique ─</span>
+    <span class="kw">public static function</span> <span class="fn">getNbVoitures</span>(): <span class="kw">int</span> {
+        <span class="kw">return</span> <span class="kw">self</span>::<span class="var">$nbVoitures</span>;
+    }
+}
+
+<span class="cmt">// ─ Utilisation ─</span>
+<span class="var">$v1</span> = <span class="kw">new</span> <span class="cls">Voiture</span>(<span class="str">"Renault"</span>, <span class="str">"rouge"</span>);
+<span class="var">$v1</span>-><span class="fn">accelerer</span>(<span class="num">80</span>);
+<span class="fn">echo</span> <span class="var">$v1</span>-><span class="fn">afficher</span>();            <span class="cmt">// Renault rouge — 80 km/h</span>
+<span class="fn">echo</span> <span class="cls">Voiture</span>::<span class="fn">getNbVoitures</span>(); <span class="cmt">// 1 (méthode statique)</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Visibilité des membres</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Modificateur</th><th>Classe elle-même</th><th>Classe enfant</th><th>Extérieur</th></tr>
+          <tr><td><code>public</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>❌</td></tr>
+          <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td></tr>
+        </table>
+      </div>
+
+      <h3>Héritage</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Héritage</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="kw">class</span> <span class="cls">VoitureElectrique</span> <span class="kw">extends</span> <span class="cls">Voiture</span> {
+    <span class="kw">private</span> <span class="kw">int</span> <span class="var">$autonomie</span>;
+
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">string</span> <span class="var">$marque</span>, <span class="kw">string</span> <span class="var">$couleur</span>, <span class="kw">int</span> <span class="var">$autonomie</span>) {
+        <span class="kw">parent</span>::<span class="fn">__construct</span>(<span class="var">$marque</span>, <span class="var">$couleur</span>);  <span class="cmt">// appel du constructeur parent</span>
+        <span class="var">$this</span>-><span class="var">autonomie</span> = <span class="var">$autonomie</span>;
+    }
+
+    <span class="cmt">// ─ Surcharge (override) de la méthode parente ─</span>
+    <span class="kw">public function</span> <span class="fn">afficher</span>(): <span class="kw">string</span> {
+        <span class="kw">return</span> <span class="kw">parent</span>::<span class="fn">afficher</span>() . <span class="str">" | Autonomie: <span class="var">{$this->autonomie}</span>km"</span>;
+    }
+
+    <span class="kw">public function</span> <span class="fn">getAutonomie</span>(): <span class="kw">int</span> { <span class="kw">return</span> <span class="var">$this</span>-><span class="var">autonomie</span>; }
+}
+
+<span class="var">$tesla</span> = <span class="kw">new</span> <span class="cls">VoitureElectrique</span>(<span class="str">"Tesla"</span>, <span class="str">"blanc"</span>, <span class="num">500</span>);
+<span class="var">$tesla</span>-><span class="fn">accelerer</span>(<span class="num">100</span>);
+<span class="fn">echo</span> <span class="var">$tesla</span>-><span class="fn">afficher</span>();  <span class="cmt">// Tesla blanc — 100 km/h | Autonomie: 500km</span>
+
+<span class="cmt">// ─ instanceof ─</span>
+<span class="fn">var_dump</span>(<span class="var">$tesla</span> <span class="kw">instanceof</span> <span class="cls">Voiture</span>);          <span class="cmt">// true</span>
+<span class="fn">var_dump</span>(<span class="var">$tesla</span> <span class="kw">instanceof</span> <span class="cls">VoitureElectrique</span>); <span class="cmt">// true</span>
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <h3>Classes abstraites &amp; Interfaces</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">PHP — Abstrait &amp; Interface</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="op">&lt;?php</span>
+<span class="cmt">// ── Classe abstraite : ne peut pas être instanciée directement ──</span>
+<span class="kw">abstract class</span> <span class="cls">Animal</span> {
+    <span class="kw">protected</span> <span class="kw">string</span> <span class="var">$nom</span>;
+
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">string</span> <span class="var">$nom</span>) { <span class="var">$this</span>-><span class="var">nom</span> = <span class="var">$nom</span>; }
+
+    <span class="kw">abstract public function</span> <span class="fn">parler</span>(): <span class="kw">string</span>;  <span class="cmt">// DOIT être implémentée</span>
+
+    <span class="kw">public function</span> <span class="fn">presenter</span>(): <span class="kw">string</span> {
+        <span class="kw">return</span> <span class="str">"Je suis <span class="var">{$this->nom}</span> et je dis : "</span> . <span class="var">$this</span>-><span class="fn">parler</span>();
+    }
+}
+
+<span class="kw">class</span> <span class="cls">Chien</span> <span class="kw">extends</span> <span class="cls">Animal</span> {
+    <span class="kw">public function</span> <span class="fn">parler</span>(): <span class="kw">string</span> { <span class="kw">return</span> <span class="str">"Wouf !"</span>; }
+}
+
+<span class="cmt">// ── Interface ──</span>
+<span class="kw">interface</span> <span class="cls">Serialisable</span> {
+    <span class="kw">public function</span> <span class="fn">toArray</span>(): <span class="kw">array</span>;
+    <span class="kw">public function</span> <span class="fn">toJSON</span>(): <span class="kw">string</span>;
+}
+
+<span class="kw">class</span> <span class="cls">Produit</span> <span class="kw">implements</span> <span class="cls">Serialisable</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">private</span> <span class="kw">string</span> <span class="var">$nom</span>, <span class="kw">private</span> <span class="kw">float</span> <span class="var">$prix</span>) {}
+    <span class="kw">public function</span> <span class="fn">toArray</span>(): <span class="kw">array</span>  { <span class="kw">return</span> [<span class="str">"nom"</span> => <span class="var">$this</span>-><span class="var">nom</span>, <span class="str">"prix"</span> => <span class="var">$this</span>-><span class="var">prix</span>]; }
+    <span class="kw">public function</span> <span class="fn">toJSON</span>(): <span class="kw">string</span>  { <span class="kw">return</span> <span class="fn">json_encode</span>(<span class="var">$this</span>-><span class="fn">toArray</span>()); }
+}
+<span class="op">?&gt;</span></pre>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div>Mémorisez la différence : <strong>classe abstraite</strong> = partage du code commun + peut avoir des méthodes concrètes. <strong>Interface</strong> = contrat pur, toutes les méthodes sont abstraites. Une classe peut implémenter plusieurs interfaces mais n'étend qu'une seule classe.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 08 — HTML ══════════════════════ -->
+    <section class="section" id="html">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2>HTML — Structure &amp; Balises</h2>
+      </div>
+
+      <h3>Structure d'une page HTML5</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">HTML5</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="val">"fr"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+    <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="val">"UTF-8"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;meta</span> <span class="attr">name</span>=<span class="val">"viewport"</span> <span class="attr">content</span>=<span class="val">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;title&gt;</span>Ma Page<span class="tag">&lt;/title&gt;</span>
+    <span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"style.css"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+    <span class="tag">&lt;header&gt;</span>       <span class="cmt">&lt;!-- en-tête --&gt;</span>
+        <span class="tag">&lt;nav&gt;</span>...<span class="tag">&lt;/nav&gt;</span>
+    <span class="tag">&lt;/header&gt;</span>
+
+    <span class="tag">&lt;main&gt;</span>         <span class="cmt">&lt;!-- contenu principal --&gt;</span>
+        <span class="tag">&lt;section&gt;</span>...<span class="tag">&lt;/section&gt;</span>
+        <span class="tag">&lt;article&gt;</span>...<span class="tag">&lt;/article&gt;</span>
+        <span class="tag">&lt;aside&gt;</span>...<span class="tag">&lt;/aside&gt;</span>
+    <span class="tag">&lt;/main&gt;</span>
+
+    <span class="tag">&lt;footer&gt;</span>...<span class="tag">&lt;/footer&gt;</span>
+
+    <span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="val">"script.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre>
+      </div>
+
+      <h3>Balises essentielles</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Balise</th><th>Rôle</th><th>Exemple</th></tr>
+          <tr><td><code>&lt;h1&gt;…&lt;h6&gt;</code></td><td>Titres (h1 = plus important)</td><td><code>&lt;h1&gt;Titre principal&lt;/h1&gt;</code></td></tr>
+          <tr><td><code>&lt;p&gt;</code></td><td>Paragraphe</td><td><code>&lt;p&gt;Du texte&lt;/p&gt;</code></td></tr>
+          <tr><td><code>&lt;a&gt;</code></td><td>Lien hypertexte</td><td><code>&lt;a href="page.php"&gt;Clic&lt;/a&gt;</code></td></tr>
+          <tr><td><code>&lt;img&gt;</code></td><td>Image (auto-fermante)</td><td><code>&lt;img src="img.jpg" alt="desc"&gt;</code></td></tr>
+          <tr><td><code>&lt;div&gt;</code></td><td>Conteneur bloc</td><td><code>&lt;div class="box"&gt;…&lt;/div&gt;</code></td></tr>
+          <tr><td><code>&lt;span&gt;</code></td><td>Conteneur inline</td><td><code>&lt;span style="color:red"&gt;…&lt;/span&gt;</code></td></tr>
+          <tr><td><code>&lt;ul&gt; &lt;ol&gt; &lt;li&gt;</code></td><td>Listes</td><td><code>&lt;ul&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ul&gt;</code></td></tr>
+          <tr><td><code>&lt;strong&gt;</code></td><td>Gras sémantique</td><td><code>&lt;strong&gt;important&lt;/strong&gt;</code></td></tr>
+          <tr><td><code>&lt;em&gt;</code></td><td>Italique sémantique</td><td><code>&lt;em&gt;emphase&lt;/em&gt;</code></td></tr>
+          <tr><td><code>&lt;br&gt;</code></td><td>Saut de ligne</td><td><code>ligne1&lt;br&gt;ligne2</code></td></tr>
+          <tr><td><code>&lt;hr&gt;</code></td><td>Ligne horizontale</td><td><code>&lt;hr&gt;</code></td></tr>
+        </table>
+      </div>
+
+      <h3>Tableaux HTML</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">HTML — Tableau</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="tag">&lt;table</span> <span class="attr">border</span>=<span class="val">"1"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;thead&gt;</span>
+        <span class="tag">&lt;tr&gt;</span>
+            <span class="tag">&lt;th&gt;</span>Nom<span class="tag">&lt;/th&gt;</span>   <span class="cmt">&lt;!-- th = en-tête, gras + centré --&gt;</span>
+            <span class="tag">&lt;th&gt;</span>Age<span class="tag">&lt;/th&gt;</span>
+        <span class="tag">&lt;/tr&gt;</span>
+    <span class="tag">&lt;/thead&gt;</span>
+    <span class="tag">&lt;tbody&gt;</span>
+        <span class="tag">&lt;tr&gt;</span>
+            <span class="tag">&lt;td&gt;</span>Alice<span class="tag">&lt;/td&gt;</span>   <span class="cmt">&lt;!-- td = cellule --&gt;</span>
+            <span class="tag">&lt;td&gt;</span>20<span class="tag">&lt;/td&gt;</span>
+        <span class="tag">&lt;/tr&gt;</span>
+        <span class="tag">&lt;tr&gt;</span>
+            <span class="tag">&lt;td</span> <span class="attr">colspan</span>=<span class="val">"2"</span><span class="tag">&gt;</span>Fusion de 2 colonnes<span class="tag">&lt;/td&gt;</span>
+        <span class="tag">&lt;/tr&gt;</span>
+    <span class="tag">&lt;/tbody&gt;</span>
+    <span class="tag">&lt;tfoot&gt;</span>
+        <span class="tag">&lt;tr&gt;</span><span class="tag">&lt;td</span> <span class="attr">colspan</span>=<span class="val">"2"</span><span class="tag">&gt;</span>Total<span class="tag">&lt;/td&gt;</span><span class="tag">&lt;/tr&gt;</span>
+    <span class="tag">&lt;/tfoot&gt;</span>
+<span class="tag">&lt;/table&gt;</span></pre>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ 09 — CSS ══════════════════════ -->
+    <section class="section" id="css">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2>CSS — Mise en forme</h2>
+      </div>
+
+      <h3>Sélecteurs</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS — Sélecteurs</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="cmt">/* Sélecteur de balise */</span>
+<span class="cls">p</span> { color: black; }
+
+<span class="cmt">/* Sélecteur de classe (. = class) */</span>
+<span class="cls">.maClasse</span> { color: red; }
+
+<span class="cmt">/* Sélecteur d'id (# = id, UNIQUE dans la page) */</span>
+<span class="cls">#monId</span> { color: blue; }
+
+<span class="cmt">/* Sélecteur universel */</span>
+<span class="cls">*</span> { box-sizing: border-box; }
+
+<span class="cmt">/* Sélecteur descendant */</span>
+<span class="cls">div p</span> { margin: 10px; }      <span class="cmt">/* tous les p dans un div */</span>
+
+<span class="cmt">/* Enfant direct */</span>
+<span class="cls">ul > li</span> { list-style: none; } <span class="cmt">/* li enfant direct de ul */</span>
+
+<span class="cmt">/* Pseudo-classes */</span>
+<span class="cls">a:hover</span>   { color: orange; }
+<span class="cls">li:nth-child(2)</span> { color: red; }
+<span class="cls">input:focus</span> { border-color: blue; }
+
+<span class="cmt">/* Pseudo-éléments */</span>
+<span class="cls">p::first-line</span>  { font-weight: bold; }
+<span class="cls">div::before</span>    { content: "→ "; }
+
+<span class="cmt">/* Sélecteur d'attribut */</span>
+<span class="cls">input[type="text"]</span> { border: 1px solid gray; }
+
+<span class="cmt">/* Groupement */</span>
+<span class="cls">h1, h2, h3</span> { font-family: Arial; }</pre>
+      </div>
+
+      <h3>Box Model</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS — Box Model</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="cmt">/*
+  ┌─────────────────────────────────┐
+  │           MARGIN                │  ← espace extérieur
+  │  ┌───────────────────────────┐  │
+  │  │         BORDER            │  │  ← bordure
+  │  │  ┌─────────────────────┐  │  │
+  │  │  │       PADDING       │  │  │  ← espace intérieur
+  │  │  │  ┌───────────────┐  │  │  │
+  │  │  │  │    CONTENT    │  │  │  │  ← contenu
+  │  │  │  └───────────────┘  │  │  │
+  │  │  └─────────────────────┘  │  │
+  │  └───────────────────────────┘  │
+  └─────────────────────────────────┘
+*/</span>
+
+<span class="cls">.boite</span> {
+    width: <span class="num">300px</span>;
+    height: <span class="num">200px</span>;
+
+    padding: <span class="num">20px</span>;              <span class="cmt">/* tous côtés */</span>
+    padding: <span class="num">10px</span> <span class="num">20px</span>;       <span class="cmt">/* haut/bas  gauche/droite */</span>
+    padding: <span class="num">5px</span> <span class="num">10px</span> <span class="num">15px</span> <span class="num">20px</span>; <span class="cmt">/* haut droite bas gauche */</span>
+
+    border: <span class="num">2px</span> solid black;   <span class="cmt">/* épaisseur style couleur */</span>
+    border-radius: <span class="num">8px</span>;         <span class="cmt">/* coins arrondis */</span>
+
+    margin: <span class="num">16px</span> auto;          <span class="cmt">/* auto = centrage horizontal */</span>
+
+    <span class="cmt">/* ⚠️ box-sizing : par défaut, width ne comprend pas padding/border */</span>
+    box-sizing: border-box;     <span class="cmt">/* width INCLUT padding + border */</span>
+}</pre>
+      </div>
+
+      <h3>Flexbox</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS — Flexbox</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="cmt">/* ─ Conteneur flex ─ */</span>
+<span class="cls">.container</span> {
+    display: flex;
+
+    <span class="cmt">/* Direction */</span>
+    flex-direction: row;           <span class="cmt">/* row | row-reverse | column | column-reverse */</span>
+
+    <span class="cmt">/* Alignement axe principal (horizontal si row) */</span>
+    justify-content: center;       <span class="cmt">/* flex-start | flex-end | center | space-between | space-around */</span>
+
+    <span class="cmt">/* Alignement axe secondaire (vertical si row) */</span>
+    align-items: center;           <span class="cmt">/* flex-start | flex-end | center | stretch | baseline */</span>
+
+    <span class="cmt">/* Retour à la ligne */</span>
+    flex-wrap: wrap;               <span class="cmt">/* nowrap | wrap | wrap-reverse */</span>
+
+    gap: <span class="num">16px</span>;                    <span class="cmt">/* espace entre éléments */</span>
+}
+
+<span class="cmt">/* ─ Éléments flex ─ */</span>
+<span class="cls">.item</span> {
+    flex: <span class="num">1</span>;          <span class="cmt">/* flex-grow: 1, s'étire pour remplir */</span>
+    flex: <span class="num">0 0</span> <span class="num">200px</span>; <span class="cmt">/* grow shrink basis (taille fixe) */</span>
+    order: <span class="num">2</span>;         <span class="cmt">/* ordre d'affichage */</span>
+    align-self: flex-end; <span class="cmt">/* surcharge align-items pour cet élément */</span>
+}</pre>
+      </div>
+
+      <h3>Positionnement</h3>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">CSS — Position</span><button class="code-copy" onclick="copyCode(this)">copier</button></div>
+        <pre><span class="cmt">/* static : défaut, suit le flux normal */</span>
+<span class="cls">.a</span> { position: static; }
+
+<span class="cmt">/* relative : décalé par rapport à sa position normale */</span>
+<span class="cls">.b</span> { position: relative; top: <span class="num">10px</span>; left: <span class="num">20px</span>; }
+
+<span class="cmt">/* absolute : par rapport au parent positionné (non-static) */</span>
+<span class="cls">.c</span> { position: absolute; top: <span class="num">0</span>; right: <span class="num">0</span>; }
+
+<span class="cmt">/* fixed : par rapport à la fenêtre (reste à l'écran) */</span>
+<span class="cls">.d</span> { position: fixed; bottom: <span class="num">20px</span>; right: <span class="num">20px</span>; }
+
+<span class="cmt">/* sticky : relative puis fixed quand on scroll */</span>
+<span class="cls">.e</span> { position: sticky; top: <span class="num">0</span>; }
+
+<span class="cmt">/* z-index : ordre de superposition (plus grand = devant) */</span>
+<span class="cls">.modal</span> { position: fixed; z-index: <span class="num">1000</span>; }</pre>
+      </div>
+
+      <h3>Propriétés CSS essentielles</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Catégorie</th><th>Propriété</th><th>Valeurs courantes</th></tr>
+          <tr><td>Texte</td><td><code>font-family</code></td><td>Arial, "Times New Roman", sans-serif</td></tr>
+          <tr><td>Texte</td><td><code>font-size</code></td><td>16px, 1.2rem, 2em</td></tr>
+          <tr><td>Texte</td><td><code>font-weight</code></td><td>normal, bold, 400, 700</td></tr>
+          <tr><td>Texte</td><td><code>text-align</code></td><td>left, center, right, justify</td></tr>
+          <tr><td>Texte</td><td><code>text-decoration</code></td><td>none, underline, line-through</td></tr>
+          <tr><td>Couleur</td><td><code>color</code></td><td>#fff, rgb(255,0,0), red</td></tr>
+          <tr><td>Fond</td><td><code>background-color</code></td><td>#f0f0f0, rgba(0,0,0,0.5)</td></tr>
+          <tr><td>Affichage</td><td><code>display</code></td><td>block, inline, inline-block, flex, grid, none</td></tr>
+          <tr><td>Taille</td><td><code>width / height</code></td><td>px, %, auto, 100vw, 100vh</td></tr>
+          <tr><td>Dépassement</td><td><code>overflow</code></td><td>visible, hidden, scroll, auto</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ QUIZ ══════════════════════ -->
+    <section class="section" id="quiz">
+      <div class="section-header">
+        <span class="section-num">✦</span>
+        <h2>QCM — Auto-évaluation</h2>
+      </div>
+
+      <p>Testez vos connaissances sur les notions du cours. Cliquez sur la réponse que vous pensez être correcte.</p>
+
+      <div class="quiz">
+        <h4>🧠 Questions BTS SIO</h4>
+
+        <!-- Q1 -->
+        <div class="quiz-item" data-answer="1">
+          <div class="quiz-q">1. Quelle superglobale PHP contient les données envoyées par un formulaire en méthode POST ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">$_GET</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">$_POST</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">$_REQUEST</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">$_FORM</div>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-item" data-answer="1">
+          <div class="quiz-q">2. Quel est le résultat de : <code>"3" === 3</code> en PHP ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">true</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">false</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">1</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">Erreur</div>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-item" data-answer="0">
+          <div class="quiz-q">3. Quelle instruction doit être présente au début de chaque page utilisant les sessions ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">session_start()</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">session_open()</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">$_SESSION = []</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">start_session()</div>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="quiz-item" data-answer="2">
+          <div class="quiz-q">4. Dans une classe PHP, quel modificateur permet l'accès à un attribut depuis la classe elle-même ET ses sous-classes, mais pas de l'extérieur ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">public</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">private</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">protected</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">static</div>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="quiz-item" data-answer="3">
+          <div class="quiz-q">5. Quelle boucle PHP s'exécute forcément au moins une fois ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">for</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">while</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">foreach</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">do...while</div>
+          </div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="quiz-item" data-answer="1">
+          <div class="quiz-q">6. Quelle propriété CSS permet de centrer des éléments horizontalement avec Flexbox ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">align-items: center</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">justify-content: center</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">text-align: center</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">margin: auto</div>
+          </div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="quiz-item" data-answer="0">
+          <div class="quiz-q">7. Quelle fonction PHP protège contre les injections XSS lors de l'affichage de données utilisateur ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">htmlspecialchars()</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">strip_html()</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">secure_output()</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">sanitize()</div>
+          </div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="quiz-item" data-answer="2">
+          <div class="quiz-q">8. Quelle est la différence principale entre un cookie et une session ?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkAnswer(this)">Les cookies sont plus sécurisés</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">Les sessions peuvent stocker plus de 4Ko</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">Les sessions sont stockées côté serveur, les cookies côté client</div>
+            <div class="quiz-opt" onclick="checkAnswer(this)">Il n'y a pas de différence</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="footer">
+    <div>PHP Master — BTS SIO · Cours complet</div>
+    <div style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px">echo "Bonne chance !" ;</div>
+  </footer>
+</main>
+
+<script>
+  // ─── SCROLL PROGRESS ───
+  const progress = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = window.scrollY / max;
+    progress.style.transform = `scaleX(${pct})`;
+  });
+
+  // ─── ACTIVE NAV ───
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const id = e.target.id;
+        const active = document.querySelector(`.nav-item[href="#${id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ─── COPY CODE ───
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copié ✓';
+      btn.style.borderColor = 'var(--accent3)';
+      btn.style.color = 'var(--accent3)';
+      setTimeout(() => {
+        btn.textContent = 'copier';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 2000);
+    });
+  }
+
+  // ─── QUIZ ───
+  function checkAnswer(el) {
+    const item = el.closest('.quiz-item');
+    if (item.dataset.answered) return;
+    item.dataset.answered = true;
+
+    const correctIndex = parseInt(item.dataset.answer);
+    const opts = item.querySelectorAll('.quiz-opt');
+
+    opts.forEach((opt, i) => {
+      if (i === correctIndex) {
+        opt.classList.add('correct');
+      } else if (opt === el) {
+        opt.classList.add('wrong');
+      }
+      opt.style.cursor = 'default';
+    });
+  }
+</script>
+</body>
+</html>
